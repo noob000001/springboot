@@ -14,7 +14,7 @@
             none : ddl off (배포시 반드시 세팅)
       
        -->
-      <property name="hibernate.hbm2ddl.auto" value="none"/>
+      <property name="hibernate.hbm2ddl.auto" value="create"/>
       <property name="hibernate.show_sql" value="true"/>
       <property name="hibernate.format_sql" value="true"/>
    </properties>
