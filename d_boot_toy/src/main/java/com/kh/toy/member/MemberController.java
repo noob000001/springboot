@@ -26,7 +26,6 @@ import org.springframework.web.util.CookieGenerator;
 
 import com.kh.toy.common.code.ErrorCode;
 import com.kh.toy.common.exception.HandlableException;
-import com.kh.toy.common.validator.ValidateResult;
 import com.kh.toy.member.validator.JoinForm;
 import com.kh.toy.member.validator.JoinFormValidator;
 
@@ -79,7 +78,7 @@ public class MemberController {
 
 	@GetMapping("join")
 	public void joinForm(Model model) {
-		model.addAttribute(new JoinForm()).addAttribute("error",new ValidateResult().getError());
+		model.addAttribute(new JoinForm());
 	}
 	
 	@PostMapping("join")
@@ -89,12 +88,7 @@ public class MemberController {
 			, HttpSession session
 			, RedirectAttributes redirectAttr
 			) {
-		
-		ValidateResult vr = new ValidateResult();
-		model.addAttribute("error",vr.getError());
-		
 		if(errors.hasErrors()) {
-			vr.addErrors(errors);
 			return "member/join";
 		}
 		
@@ -120,7 +114,7 @@ public class MemberController {
 			throw new HandlableException(ErrorCode.AUTHENTICATION_FAILED_ERROR);
 		}
 		
-		memberService.insertMember(form);
+		memberService.persistMember(form);
 		redirectAttrs.addFlashAttribute("message", "회원가입을 환영합니다. 로그인 해주세요");
 		session.removeAttribute("persistToken");
 		session.removeAttribute("persistUser");
@@ -176,12 +170,10 @@ public class MemberController {
 	@GetMapping("id-check")
 	@ResponseBody
 	public String idCheck(String userId) {
-		Member member = memberService.selectMemberByUserId(userId);
-		
-		if(member == null) {
-			return "available";
-		}else {
+		if(memberService.existsMemberById(userId)) {
 			return "disable";
+		}else {
+			return "available";
 		}
 	}
 	

@@ -2,6 +2,7 @@ package com.kh.toy.board;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,25 +37,58 @@ public class BoardController {
 				, Board board
 					
 			) {
-
-		logger.debug("filesSize : " + files.size());
-		logger.debug("files.0" + files.get(0));
-		logger.debug("mf.isEmpty : " + files.get(0).isEmpty());
 		
 		board.setMember(member);
-		boardService.insertBoard(files, board);
+		boardService.persistBoard(files, board);
 		return "redirect:/";
 	}
 	
 	@GetMapping("board-detail")
-	public void boardDetail(Model model, String bdIdx) {
-		Map<String,Object> commandMap = boardService.selectBoardByIdx(bdIdx);
+	public void boardDetail(Model model, Long bdIdx) {
+		Board board = boardService.findBoardById(bdIdx);
+		model.addAttribute("board", board);
+	}
+	
+	@GetMapping("board-list")
+	public void boardList(Model model
+						, @RequestParam(required = false, defaultValue = "1") 
+						  int page) {
+		
+		Map<String, Object> commandMap = boardService.findBoardsByPage(page);
 		model.addAllAttributes(commandMap);
+	}
+	
+
+	@GetMapping("board-modify")
+	public void boardModify(Model model,
+							long bdIdx) {
+		
+		Board boardEntity = boardService.findBoardById(bdIdx);
+		model.addAttribute("board", boardEntity);
+	}
+	
+	
+	@PostMapping("modify")
+	public String modifyBoard(@RequestParam List<MultipartFile> files
+							, Board board
+							, @RequestParam(required = false) Optional<List<Long>> removeFlIdx) {
+		
+		boardService.modifyBoard(board,files,removeFlIdx.orElse(List.of()));
+		return "redirect:/board/board-detail?bdIdx="+board.getBdIdx();
 	}
 	
 	
 	
-
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
